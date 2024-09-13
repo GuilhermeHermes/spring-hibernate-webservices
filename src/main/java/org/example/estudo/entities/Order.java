@@ -19,21 +19,20 @@ import java.util.Set;
 public class Order implements Serializable {
     private static final long serialVersionUID = 1L;
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "GMT")
     private Instant moment;
     private Integer orderStatus;
-
-
     @ManyToOne
     @JoinColumn(name = "client_id")
     private User client;
     @OneToMany(mappedBy = "id.order")
     private Set<OrderItem> items = new HashSet<>();
+
+    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
+    private Payment payment;
 
 
     public Order(Instant moment, OrderStatus orderStatus, User client) {
@@ -75,8 +74,19 @@ public class Order implements Serializable {
         return client;
     }
 
+    public void setClient(User client){
+        this.client = client;
+    }
     public Set<OrderItem> getItems (){
         return items;
+    }
+
+    public Payment getPayment() {
+        return payment;
+    }
+
+    public void setPayment(Payment payment) {
+        this.payment = payment;
     }
 
     public boolean equals(Object o) {
@@ -100,4 +110,13 @@ public class Order implements Serializable {
                 ", client= " + client +
                 '}';
     }
+
+    public Double getTotal(){
+        double total = 0;
+        for(OrderItem oi : items){
+            total += oi.getSubtotal();
+        }
+        return total;
+    }
+
 }

@@ -22,4 +22,8 @@ public class OrderService {
     public Optional<Order> findById(Long id){
         return orderRepository.findById(id);
     }
+
+    public Double getTotal(Long id){
+        return orderRepository.findById(id).get().getTotal();
+    }
 }

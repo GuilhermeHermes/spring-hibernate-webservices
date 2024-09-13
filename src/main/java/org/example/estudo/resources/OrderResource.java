@@ -45,4 +45,10 @@ public class OrderResource {
                     .body("An unexpected error occurred.");
         }
     }
+
+    @RequestMapping(value = "/total/{id}")
+    public ResponseEntity<?> getTotal(@PathVariable Long id){
+        Double total = service.getTotal(id);
+        return ResponseEntity.ok().body(total);
+    }
 }
