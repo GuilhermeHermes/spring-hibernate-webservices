@@ -29,20 +29,11 @@ public class UserResource {
     @GetMapping(value = "/{id}")
     public ResponseEntity<?> findById(@PathVariable Long id){
 
-        try {
-            Optional<User> user = service.findById(id);
-            if (user.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("User with ID " + id + " not found.");
-            }
+
+            User user = service.findById(id);
+
             return ResponseEntity.ok().body(user);
-        } catch (HttpClientErrorException.NotFound e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("User with ID " + id + " not found.");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("An unexpected error occurred.");
-        }
+
     }
 
     @PostMapping
@@ -53,6 +44,18 @@ public class UserResource {
                 .buildAndExpand(user.getId())
                 .toUri();
         return ResponseEntity.created(uri).body(user);
+    }
+
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id){
+        service.deleteUser(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping(value = "/{id}")
+    public ResponseEntity<User> updateUser(@PathVariable Long id,@RequestBody User user){
+        User updatedUser = service.updateUser(id, user);
+        return ResponseEntity.ok().body(updatedUser);
     }
 
 }
