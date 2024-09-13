@@ -1,8 +1,12 @@
 package org.example.estudo.services;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.example.estudo.repositories.UserRepository;
+import org.example.estudo.services.exceptions.DatabaseException;
 import org.example.estudo.services.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.example.estudo.entities.User;
 
@@ -27,12 +31,26 @@ public class UserService {
 
     public User insertUser(User user){ return userRepository.save(user);}
 
-    public void deleteUser(Long id){  userRepository.deleteById(id);}
+    public void deleteUser(Long id){
+        if (!userRepository.existsById(id)) {
+            throw new ResourceNotFoundException(id);
+        }
+
+    try {
+        userRepository.deleteById(id);
+    } catch (DataIntegrityViolationException e) {
+        throw new DatabaseException(e.getMessage());
+    }
+    }
 
     public User updateUser(Long id, User user){
-        User entity = userRepository.getReferenceById(id);
-        updateData(entity, user);
-        return userRepository.save(entity);
+       try {
+           User entity = userRepository.getReferenceById(id);
+           updateData(entity, user);
+           return userRepository.save(entity);
+       } catch (EntityNotFoundException e) {
+           throw new ResourceNotFoundException(id);
+       }
     }
 
     private void updateData(User entity, User user){
