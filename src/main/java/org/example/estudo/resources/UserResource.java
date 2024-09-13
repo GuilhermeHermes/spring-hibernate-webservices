@@ -5,12 +5,11 @@ import org.example.estudo.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,12 +21,12 @@ public class UserResource {
     private UserService service;
 
     @GetMapping
-    public ResponseEntity<List<User>> FindAll(){
+    public ResponseEntity<List<User>> findAll(){
         List<User> usersList = service.findAll();
         return ResponseEntity.ok().body(usersList);
     }
 
-    @RequestMapping(value = "/{id}")
+    @GetMapping(value = "/{id}")
     public ResponseEntity<?> findById(@PathVariable Long id){
 
         try {
@@ -45,4 +44,15 @@ public class UserResource {
                     .body("An unexpected error occurred.");
         }
     }
+
+    @PostMapping
+    public ResponseEntity<User> insertUser(@RequestBody User user) {
+        user = service.insertUser(user);
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(user.getId())
+                .toUri();
+        return ResponseEntity.created(uri).body(user);
+    }
+
 }
